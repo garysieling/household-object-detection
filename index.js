@@ -10,21 +10,22 @@ data.filter(
 	(row) => row.length > 0
 ).map(
 	(row) => {
-		console.log(row);
+		//console.log(row);
 		return JSON.parse(row)
 	}
 ).map(
 	(data) => {
     if (!data.annotation) { return ; }
-    console.log(data.content);
+
+    //console.log(data.content);
     const file = data.content.replace(/.*[/]/, '');
-    const out = 'labels/' + file;
+    const out = 'labels/' + file.replace(/[.]jpeg/, '.jpg');
 	  script = script + 'curl -o ' + out + ' ' + data.content + "\n";
 		let labels = "";
 
 		data.annotation.map(
 			(annotation) => {
-        console.log(JSON.stringify(annotation, null, 2));
+        //console.log(JSON.stringify(annotation, null, 2));
 				const x1 = Math.min.apply(Math, annotation.points.map( (p) => p[0] ));
 				const y1 = Math.min.apply(Math, annotation.points.map( (p) => p[1] ));
 				const x2 = Math.max.apply(Math, annotation.points.map( (p) => p[0] ));
@@ -36,12 +37,16 @@ data.filter(
 				const xc = (x2 + x1) / 2;
 				const yc = (y2 + y1) / 2;
 
-				const string = "tube" + " " + xc + " " + yc + " " + width + " " + height;
+        //console.log(x1, y1, x2, y2, xc, yc, width, height);
+				//const string = "1" + " " + xc + " " + yc + " " + width + " " + height;
+				//const string = "0 0.5 0.5 0.100 0.100";
+        const string = `14 0.750704225352 0.834 0.402816901408 0.332
+14 0.412676056338 0.793 0.50985915493 0.414`;
 				labels = labels + string + "\n";
 			}
 		)
     
-    fs.writeFileSync('./labels/' + file.split('.')[0] + '.txt', labels);
+    fs.writeFileSync('./labels/' + file.substring(0, file.lastIndexOf('.')) + '.txt', labels);
 
     if (Math.random() > 0.33) {
 			train += out + "\n";
@@ -53,5 +58,5 @@ data.filter(
 );
 
 fs.writeFileSync('images.sh', script);
-fs.writeFileSync('train.txt', train);
-fs.writeFileSync('test.txt', test);
+fs.writeFileSync('cfg/train.txt', train);
+fs.writeFileSync('cfg/test.txt', test);
